@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labirinto de Resgate Psicológico - UNIPAR</title>
+    <style>
+        :root {
+            --unipar-red: #D32F2F;
+            --unipar-light-red: #EF5350;
+            --unipar-white: #FFFFFF;
+            --unipar-light-gray: #F5F5F5;
+            --unipar-gray: #9E9E9E;
+            --unipar-dark: #212121;
+            --background-color: #303030;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--unipar-white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: linear-gradient(to bottom, #202020, #303030);
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--unipar-red);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            color: var(--unipar-white);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .rescue-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+            background-color: var(--unipar-white);
+            color: var(--unipar-red);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .maze-container {
+            position: relative;
+            margin-bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        canvas {
+            background-color: var(--unipar-dark);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            max-width: 100%;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+            width: 200px;
+            height: 200px;
+        }
+        
+        .control-btn {
+            background-color: var(--unipar-red);
+            border: none;
+            border-radius: 12px;
+            color: var(--unipar-white);
+            font-size: 1.8rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .control-btn:active {
+            background-color: var(--unipar-light-red);
+            transform: scale(0.95);
+        }
+        
+        .up { grid-area: 1 / 2 / 2 / 3; }
+        .left { grid-area: 2 / 1 / 3 / 2; }
+        .right { grid-area: 2 / 3 / 3 / 4; }
+        .down { grid-area: 3 / 2 / 4 / 3; }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background-color: var(--unipar-white);
+            color: var(--unipar-dark);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+            border: 3px solid var(--unipar-red);
+        }
+        
+        .modal h2 {
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            color: var(--unipar-red);
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: var(--unipar-dark);
+        }
+        
+        .restart-btn {
+            background-color: var(--unipar-red);
+            color: var(--unipar-white);
+            border: none;
+            border-radius: 24px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .restart-btn:hover {
+            background-color: var(--unipar-light-red);
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            background-color: var(--unipar-dark);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--unipar-red);
+        }
+        
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                width: 220px;
+                height: 220px;
+            }
+            
+            .instructions {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .controls {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .control-btn {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Efeito de luz na porta */
+        .door-light {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.6) 0%, rgba(76, 175, 80, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 4;
+            animation: pulse 2s infinite alternate;
+            display: none;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: scale(0.9); }
+            100% { opacity: 0.8; transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>Labirinto de Resgate Psicológico</h1>
+            <div class="rescue-count">Resgates: <span id="rescue-counter">0/4</span></div>
+        </header>
+        
+        <div class="instructions">
+            Use as setas ou os botões para mover o psicólogo e resgatar todos os pacientes.
+        </div>
+        
+        <div class="maze-container">
+            <canvas id="maze-canvas" width="600" height="600"></canvas>
+            <div class="door-light" id="door-light"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn up">↑</button>
+            <button class="control-btn left">←</button>
+            <button class="control-btn right">→</button>
+            <button class="control-btn down">↓</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="victory-modal">
+        <div class="modal-content">
+            <h2>Missão Cumprida! 🎉</h2>
+            <p>Parabéns! Você venceu o labirinto, guiou cada mente aprisionada e trouxe seus pacientes de volta à luz.</p>
+            <button class="restart-btn">🔁 Jogar novamente</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configuração do jogo
+            const canvas = document.getElementById('maze-canvas');
+            const ctx = canvas.getContext('2d');
+            const rescueCounter = document.getElementById('rescue-counter');
+            const victoryModal = document.getElementById('victory-modal');
+            const restartBtn = document.querySelector('.restart-btn');
+            const doorLight = document.getElementById('door-light');
+            
+            // Ajustar tamanho do canvas para dispositivos móveis
+            function adjustCanvasSize() {
+                const maxWidth = Math.min(600, window.innerWidth - 40);
+                canvas.width = maxWidth;
+                canvas.height = maxWidth;
+                drawMaze();
+            }
+            
+            // Dados do labirinto
+            const mazeData = {
+                width: 15,
+                height: 15,
+                start: {x: 1, y: 1},
+                exit: {x: 13, y: 13},
+                maze: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+                    [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+                    [1,0,1,0,0,0,0,0,1,0,1,0,1,1,1],
+                    [1,0,1,1,1,1,1,0,1,0,1,0,0,0,1],
+                    [1,0,0,0,0,0,1,0,1,0,0,0,1,0,1],
+                    [1,1,1,1,1,0,1,0,1,1,1,1,1,0,1],
+                    [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,1,1,1,1,1,1,1,1,1,0,1],
+                    [1,0,1,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,0,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,1,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,1,1,1,1,1,1,1,1,1,1,1,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                patients: [
+                    {x: 5, y: 2},
+                    {x: 9, y: 5},
+                    {x: 3, y: 9},
+                    {x: 12, y: 11}
+                ]
+            };
+            
+            // Estado do jogo
+            let gameState = {
+                player: {...mazeData.start},
+                rescuedPatients: [],
+                rescuedCount: 0,
+                exitReached: false
+            };
+            
+            // Tamanho do tile (ajustável conforme tamanho da tela)
+            let tileSize = Math.floor(canvas.width / mazeData.width);
+            
+            // Cores da UNIPAR
+            const colors = {
+                wall: '#37474F',
+                path: '#F5F5F5',
+                player: '#D32F2F',
+                patient: '#9E9E9E',
+                exit: '#4CAF50',
+                playerSymbol: '#FFFFFF',
+                patientSymbol: '#FFFFFF'
+            };
+            
+            // Texturas para as paredes
+            function createWallTexture() {
+                const textureCanvas = document.createElement('canvas');
+                textureCanvas.width = 50;
+                textureCanvas.height = 50;
+                const textureCtx = textureCanvas.getContext('2d');
+                
+                // Gradiente para textura de parede
+                const gradient = textureCtx.createLinearGradient(0, 0, 50, 50);
+                gradient.addColorStop(0, '#263238');
+                gradient.addColorStop(1, '#37474F');
+                
+                textureCtx.fillStyle = gradient;
+                textureCtx.fillRect(0, 0, 50, 50);
+                
+                // Adicionar detalhes de textura
+                textureCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                for (let i = 0; i < 50; i++) {
+                    for (let j = 0; j < 50; j++) {
+                        if (Math.random() > 0.9) {
+                            textureCtx.fillRect(i, j, 1, 1);
+                        }
+                    }
+                }
+                
+                return textureCanvas;
+            }
+            
+            const wallTexture = createWallTexture();
+            
+            // Carregar imagens
+            const images = {
+                psychologist: new Image(),
+                patients: [
+                    new Image(),
+                    new Image(),
+                    new Image(),
+                    new Image()
+                ],
+                loaded: 0,
+                total: 5
+            };
+            
+            // Função para verificar se todas as imagens foram carregadas
+            function imageLoaded() {
+                images.loaded++;
+                if (images.loaded === images.total) {
+                    drawMaze();
+                }
+            }
+            
+            // Carregar a imagem do psicólogo (aumentada)
+            images.psychologist.onload = imageLoaded;
+            images.psychologist.src = './assets/psicologo.png';
+            
+            // Carregar as imagens dos pacientes (aumentadas)
+            for (let i = 0; i < 4; i++) {
+                images.patients[i].onload = imageLoaded;
+                images.patients[i].src = `./assets/paciente ${i+1}.png`;
+            }
+            
+            // Fallback para imagens não carregadas
+            setTimeout(() => {
+                if (images.loaded < images.total) {
+                    console.log("Usando fallback para imagens não carregadas");
+                    drawMaze();
+                }
+            }, 3000);
+            
+            // Inicializar o jogo
+            function initGame() {
+                adjustCanvasSize();
+                gameState = {
+                    player: {...mazeData.start},
+                    rescuedPatients: [],
+                    rescuedCount: 0,
+                    exitReached: false
+                };
+                updateRescueCounter();
+                if (images.loaded === images.total) {
+                    drawMaze();
+                }
+                victoryModal.classList.remove('active');
+                doorLight.style.display = 'none';
+            }
+            
+            // Atualizar contador de resgates
+            function updateRescueCounter() {
+                rescueCounter.textContent = `${gameState.rescuedCount}/${mazeData.patients.length}`;
+            }
+            
+            // Atualizar posição do efeito de luz na porta
+            function updateDoorLight() {
+                const exitX = mazeData.exit.x * tileSize + tileSize/2;
+                const exitY = mazeData.exit.y * tileSize + tileSize/2;
+                
+                doorLight.style.left = `${exitX - 35}px`;
+                doorLight.style.top = `${exitY - 35}px`;
+                
+                // Mostrar luz apenas se o jogador estiver perto da porta
+                const playerX = gameState.player.x;
+                const playerY = gameState.player.y;
+                const exit = mazeData.exit;
+                
+                const distance = Math.sqrt(Math.pow(playerX - exit.x, 2) + Math.pow(playerY - exit.y, 2));
+                
+                if (distance < 5) {
+                    doorLight.style.display = 'block';
+                } else {
+                    doorLight.style.display = 'none';
+                }
+            }
+            
+            // Desenhar o labirinto
+            function drawMaze() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Recalcular tileSize com base no tamanho atual do canvas
+                tileSize = Math.floor(canvas.width / mazeData.width);
+                
+                // Desenhar tiles
+                for (let y = 0; y < mazeData.height; y++) {
+                    for (let x = 0; x < mazeData.width; x++) {
+                        const tileType = mazeData.maze[y][x];
+                        const xPos = x * tileSize;
+                        const yPos = y * tileSize;
+                        
+                        if (tileType === 1) { // Parede
+                            drawWall(xPos, yPos);
+                        } else { // Caminho
+                            drawPath(xPos, yPos);
+                        }
+                        
+                        // Desenhar saída
+                        if (tileType === 3) {
+                            drawExit(xPos, yPos);
+                        }
+                    }
+                }
+                
+                // Desenhar pacientes não resgatados
+                mazeData.patients.forEach((patient, index) => {
+                    if (!gameState.rescuedPatients.includes(index)) {
+                        drawPatient(patient.x * tileSize, patient.y * tileSize, index);
+                    }
+                });
+                
+                // Desenhar jogador
+                drawPlayer(gameState.player.x * tileSize, gameState.player.y * tileSize);
+                
+                // Atualizar posição da luz da porta
+                updateDoorLight();
+            }
+            
+            // Desenhar parede
+            function drawWall(x, y) {
+                // Usar textura para as paredes
+                ctx.drawImage(wallTexture, 0, 0, 50, 50, x, y, tileSize, tileSize);
+                
+                // Efeito de relevo
+                ctx.strokeStyle = '#1E272C';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, tileSize, tileSize);
+            }
+            
+            // Desenhar caminho
+            function drawPath(x, y) {
+                // Gradiente suave para o caminho
+                const gradient = ctx.createLinearGradient(x, y, x + tileSize, y + tileSize);
+                gradient.addColorStop(0, '#F5F5F5');
+                gradient.addColorStop(1, '#E0E0E0');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.roundRect(x, y, tileSize, tileSize, 4);
+                ctx.fill();
+                
+                // Padrão sutil no chão
+                ctx.fillStyle = 'rgba(245, 245, 245, 0.1)';
+                for (let i = 0; i < 4; i++) {
+                    const dotX = x + tileSize/4 + (i % 2) * tileSize/2;
+                    const dotY = y + tileSize/4 + Math.floor(i/2) * tileSize/2;
+                    ctx.beginPath();
+                    ctx.arc(dotX, dotY, tileSize/20, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Desenhar saída
+            function drawExit(x, y) {
+                drawPath(x, y);
+                
+                // Desenhar emoji de porta
+                ctx.font = `bold ${tileSize * 0.7}px Arial`;
+                ctx.fillStyle = '#4CAF50';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🚪', x + tileSize/2, y + tileSize/2);
+                
+                // Efeito de brilho na saída
+                ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+                ctx.beginPath();
+                ctx.arc(x + tileSize/2, y + tileSize/2, tileSize/3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Desenhar paciente (aumentado)
+            function drawPatient(x, y, index) {
+                const img = images.patients[index];
+                const size = tileSize * 1.0; // Aumentado de 0.85 para 1.0
+                const offset = (tileSize - size) / 2;
+                
+                if (img.complete && img.naturalHeight !== 0) {
+                    // Desenhar sombra
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 3;
+                    
+                    ctx.drawImage(img, x + offset, y + offset, size, size);
+                    
+                    // Remover sombra
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                } else {
+                    // Fallback caso a imagem não carregue
+                    ctx.fillStyle = colors.patient;
+                    ctx.beginPath();
+                    ctx.arc(x + tileSize/2, y + tileSize/2, size/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = colors.patientSymbol;
+                    ctx.font = `bold ${tileSize * 0.5}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('P', x + tileSize/2, y + tileSize/2);
+                }
+            }
+            
+            // Desenhar jogador (aumentado)
+            function drawPlayer(x, y) {
+                const img = images.psychologist;
+                const size = tileSize * 1.0; // Aumentado de 0.9 para 1.0
+                const offset = (tileSize - size) / 2;
+                
+                if (img.complete && img.naturalHeight !== 0) {
+                    // Desenhar sombra
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 3;
+                    
+                    ctx.drawImage(img, x + offset, y + offset, size, size);
+                    
+                    // Remover sombra
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                } else {
+                    // Fallback caso a imagem não carregue
+                    ctx.fillStyle = colors.player;
+                    ctx.beginPath();
+                    ctx.arc(x + tileSize/2, y + tileSize/2, size/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = colors.playerSymbol;
+                    ctx.font = `bold ${tileSize * 0.6}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('Ψ', x + tileSize/2, y + tileSize/2);
+                }
+            }
+            
+            // Mover jogador
+            function movePlayer(dx, dy) {
+                const newX = gameState.player.x + dx;
+                const newY = gameState.player.y + dy;
+                
+                // Verificar se o movimento é válido
+                if (newX >= 0 && newX < mazeData.width && 
+                    newY >= 0 && newY < mazeData.height && 
+                    mazeData.maze[newY][newX] !== 1) {
+                    
+                    gameState.player.x = newX;
+                    gameState.player.y = newY;
+                    
+                    // Verificar se resgatou um paciente
+                    const patientIndex = mazeData.patients.findIndex(p => p.x === newX && p.y === newY);
+                    if (patientIndex !== -1 && !gameState.rescuedPatients.includes(patientIndex)) {
+                        gameState.rescuedPatients.push(patientIndex);
+                        gameState.rescuedCount++;
+                        updateRescueCounter();
+                        
+                        // Efeito visual ao resgatar paciente
+                        drawMaze();
+                        setTimeout(() => {
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                            ctx.beginPath();
+                            ctx.arc(newX * tileSize + tileSize/2, newY * tileSize + tileSize/2, tileSize/2, 0, Math.PI * 2);
+                            ctx.fill();
+                            setTimeout(drawMaze, 100);
+                        }, 50);
+                        return;
+                    }
+                    
+                    // Verificar se chegou na saída
+                    if (mazeData.maze[newY][newX] === 3) {
+                        gameState.exitReached = true;
+                        
+                        // Verificar vitória (todos pacientes resgatados)
+                        if (gameState.rescuedCount === mazeData.patients.length) {
+                            setTimeout(() => {
+                                victoryModal.classList.add('active');
+                            }, 500);
+                        }
+                    }
+                    
+                    drawMaze();
+                }
+            }
+            
+            // Event listeners para controles
+            document.querySelector('.up').addEventListener('click', () => movePlayer(0, -1));
+            document.querySelector('.down').addEventListener('click', () => movePlayer(0, 1));
+            document.querySelector('.left').addEventListener('click', () => movePlayer(-1, 0));
+            document.querySelector('.right').addEventListener('click', () => movePlayer(1, 0));
+            
+            // Event listener para teclado
+            document.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case 'ArrowUp':
+                        movePlayer(0, -1);
+                        break;
+                    case 'ArrowDown':
+                        movePlayer(0, 1);
+                        break;
+                    case 'ArrowLeft':
+                        movePlayer(-1, 0);
+                        break;
+                    case 'ArrowRight':
+                        movePlayer(1, 0);
+                        break;
+                }
+            });
+            
+            // Reiniciar jogo
+            restartBtn.addEventListener('click', initGame);
+            
+            // Redimensionar canvas quando a janela for redimensionada
+            window.addEventListener('resize', initGame);
+            
+            // Iniciar o jogo
+            initGame();
+        });
+    </script>
+</body>
+</html>

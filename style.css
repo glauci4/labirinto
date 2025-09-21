@@ -1,0 +1,200 @@
+:root {
+    --unipar-red: #E30613;
+    --unipar-white: #FFFFFF;
+    --unipar-gray: #7C7C7C;
+    --unipar-dark: #2D2D2D;
+    --background-color: #1a2026;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--unipar-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.unipar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.unipar-logo {
+    height: 60px;
+    background: var(--unipar-red);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    padding: 0 20px;
+    border-radius: 8px;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--unipar-red);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+    font-size: 1.5rem;
+    color: var(--unipar-white);
+}
+
+.rescue-count {
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: var(--unipar-white);
+    color: var(--unipar-red);
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
+.maze-container {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+canvas {
+    background-color: var(--unipar-dark);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 30px;
+    width: 180px;
+    height: 180px;
+}
+
+.control-btn {
+    background-color: var(--unipar-red);
+    border: none;
+    border-radius: 10px;
+    color: var(--unipar-white);
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.control-btn:active {
+    background-color: var(--unipar-gray);
+    color: var(--unipar-white);
+    transform: scale(0.95);
+}
+
+.up { grid-area: 1 / 2 / 2 / 3; }
+.left { grid-area: 2 / 1 / 3 / 2; }
+.right { grid-area: 2 / 3 / 3 / 4; }
+.down { grid-area: 3 / 2 / 4 / 3; }
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    background-color: var(--unipar-white);
+    color: var(--unipar-dark);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.modal h2 {
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+    color: var(--unipar-red);
+}
+
+.modal p {
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.restart-btn {
+    background-color: var(--unipar-red);
+    color: var(--unipar-white);
+    border: none;
+    border-radius: 24px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.restart-btn:hover {
+    background-color: #c10510;
+    transform: translateY(-2px);
+}
+
+@media (min-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .controls {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .unipar-logo {
+        height: 80px;
+    }
+}
